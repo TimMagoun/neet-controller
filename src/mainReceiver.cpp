@@ -1,38 +1,22 @@
-#include <Arduino.h>
+#include <nRF_common.h>
 
-#include "nRF_common.h"
-#include "printf.h"
+bool isTransmit = 0;
+/* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
 RF24 radio(9, 10);
-
-byte pipe_num, rx_buf;
-
+byte pipeNo, gotByte;              // Declare variables for the pipe and the byte received
+    
 void setup() {
     Serial.begin(115200);
-    printf_begin();
-
-    printf("Hello %d world %s\n", 5, "test");
-    radio.begin();
-    configure_radio(&radio, 42, false);
-    radio.writeAckPayload(1, &rx_buf, 1);
-    radio.printPrettyDetails();
+    // Setup and configure radio
+    configure_radio(radio, 42, isTransmit);
 }
 
-void loop() {
-    // put your main code here, to run repeatedly:
-    while (radio.available(&pipe_num)) {
-        radio.read(&rx_buf, 1);
-        if (((uint8_t)rx_buf) % 3 == 0) {
-            if (!radio.writeAckPayload(1, &rx_buf, 1)) {
-                Serial.println("Acked with payload");
-            } else {
-              Serial.println("Failed to Ack with payload");
-            }
-        }
-        Serial.println(rx_buf);
+void loop(void) {
+    while (radio.available(&pipeNo)) { // Read all available payloads
+        radio.read(&gotByte, 1);
+        // Since this is a call-response. Respond directly with an ack payload. ss
+        radio.writeAckPayload(pipeNo, &gotByte, 1); // This can be commented out to send empty payloads.
+        Serial.print(F("Loaded next response "));
+        Serial.println(gotByte);
     }
-
-    if (radio.failureDetected) {
-        Serial.println("Failure Detected");
-    }
-    delay(1);
 }

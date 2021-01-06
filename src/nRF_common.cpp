@@ -1,7 +1,6 @@
 #include "nRF_common.h"
 
-const byte tx_to_rx_pipe[] = "tx2rx";
-const byte rx_to_tx_pipe[] = "rx2tx";
+
 const rf24_pa_dbm_e pa_level = RF24_PA_LOW;
 
 /**
@@ -10,26 +9,27 @@ const rf24_pa_dbm_e pa_level = RF24_PA_LOW;
  * Returns 0 if successful
  */
 
-int configure_radio(const RF24 *pRadio, uint8_t p_channel_num, boolean isTransmit) {
-    if (p_channel_num > 125) {
+int configure_radio(RF24 &pRadio, uint8_t p_channel_num, boolean isTransmit) {
+    if (p_channel_num > 125){
         return 1;
     }
+    
+    pRadio.begin();
 
-    RF24 r = *pRadio;
-    r.setPALevel(pa_level);
-    r.setChannel(p_channel_num);
-    r.setRetries(5, 5);
-    r.enableAckPayload();
-    r.enableDynamicPayloads();
+    pRadio.setPALevel(pa_level);
+    pRadio.setRetries(0, 2);
+    pRadio.setChannel(p_channel_num);
+    pRadio.enableAckPayload();      // Allow optional ack payloads
+    pRadio.enableDynamicPayloads(); // Ack payloads are dynamic payloads
 
     if (isTransmit) {
-        r.openWritingPipe(tx_to_rx_pipe);
-        r.openReadingPipe(1, rx_to_tx_pipe);
-        r.stopListening();
+        pRadio.openWritingPipe(addr[1]);
+        pRadio.openReadingPipe(1, addr[0]);
+        pRadio.stopListening();
     } else {
-        r.openWritingPipe(rx_to_tx_pipe);
-        r.openReadingPipe(1, tx_to_rx_pipe);
-        r.startListening();
+        pRadio.openWritingPipe(addr[0]);
+        pRadio.openReadingPipe(1, addr[1]);
+        pRadio.startListening(); // Start listening
     }
 
     return 0;
