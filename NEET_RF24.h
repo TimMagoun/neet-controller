@@ -8,7 +8,7 @@
 #define RECEIVER_TIMEOUT_MSEC 100         // msecs without a new packet before receiver enters failsafe
 #define CONTROLLER_RATE_HZ 20             // Rate to send control inputs in Hz
 #define DATA_RATE RF24_1MBPS              // Data rate of the module, lower means longer time but more reliability
-#define RECEIVER_POWER_LVL RF24_PA_HIGH   // Power level of the receiver on board
+#define RADIO_POWER_LVL RF24_PA_HIGH   // Power level of the receiver on board
 #define MAX_TELEM_STRING_LEN 63           // Length of message not including null terminator
 
 struct ControlInput {
@@ -40,9 +40,9 @@ class NEET_RF24{
 
     bool rxUpdate();
     ControlInput rxGetInput();
-    bool rxSendTelemetry(String s); // TODO Add overload with char*
+    bool rxSendTelemetry(String s, bool override = false); // TODO Add overload with char*
 
-    void txSetPower(rf24_pa_dbm_e power);
+    void txSetChannel(uint8_t channel);
     bool txSendControlInput(ControlInput in);
     uint8_t txGetTelemetry(char* buf);
 

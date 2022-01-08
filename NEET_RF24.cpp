@@ -47,25 +47,15 @@ bool NEET_RF24::begin(){
   _radio.openWritingPipe(_address[_is_transmit]);
   _radio.openReadingPipe(1, _address[!_is_transmit]);
 
+  _radio.setPALevel(RADIO_POWER_LVL);
+
   if (!_is_transmit){
-    _radio.setPALevel(RECEIVER_POWER_LVL);
     _radio.startListening();
   } else {
     _radio.stopListening();
   }
 
   return success;
-}
-
-/**
-*   Sets power level if this is a transmitter
-*
-*   @param power Transmission power in dBm
-**/
-void NEET_RF24::txSetPower(rf24_pa_dbm_e power){
-  if (_is_transmit){
-    _radio.setPALevel(power);
-  }
 }
 
 /**
@@ -121,10 +111,11 @@ ControlInput NEET_RF24::rxGetInput(){
 *   Populates the telemetry string to be sent using ack payloads
 *   
 *   @param s String telemetry, should be under MAX_TELEM_STRING_LEN
+*   @param override bool, if true it will start sending regardless of if rx_has_ack_payload
 *   @returns true if s is within length limit and radio is not already sending a telemetry msg
 **/
-bool NEET_RF24::rxSendTelemetry(String s){
-  if (_rx_has_ack_payload){
+bool NEET_RF24::rxSendTelemetry(String s, bool override){
+  if (_rx_has_ack_payload && !override){
     return false;
   }
   if (s.length() > MAX_TELEM_STRING_LEN){
@@ -202,4 +193,16 @@ uint8_t NEET_RF24::txGetTelemetry(char* buf){
   }
   
   return 0;
+}
+
+/**
+*   Sets the channel if this is a transmitter
+*
+*   @param channel Channel as a uint8_t
+**/
+void NEET_RF24::txSetChannel(uint8_t channel){
+  if (_is_transmit){
+    _channel = channel;
+    _radio.setChannel(_channel);
+  }
 }
