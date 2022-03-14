@@ -9,9 +9,8 @@
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include <Servo.h>
-#include "utility/Adafruit_MS_PWMServoDriver.h"
 
-NEET_RF24 radio(NRF_CE, NRF_CSN, 25);
+NEET_RF24 radio(NRF_CE, NRF_CSN, 7);
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *motor_left = AFMS.getMotor(1);
@@ -54,7 +53,7 @@ void loop(){
     drive(left + right * 0.4, left - right * 0.4);
 
     if (millis() < last_reading || (millis() - last_reading) > 100){
-      radio.rxSendTelemetry("Distance is: " + String(readUltrasonic()) + " cm\n           ");
+      radio.rxSendTelemetry("Distance is: " + String(readUltrasonic()) + " cm\n");
       last_reading = millis();
     }
 

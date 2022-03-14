@@ -6,7 +6,7 @@
 #include <RF24.h>
 
 #define RECEIVER_TIMEOUT_MSEC 100         // msecs without a new packet before receiver enters failsafe
-#define CONTROLLER_RATE_HZ 40             // Rate to send control inputs in Hz
+#define CONTROLLER_RATE_HZ 100             // Rate to send control inputs in Hz
 #define DATA_RATE RF24_1MBPS              // Data rate of the module, lower means longer time but more reliability
 #define RADIO_POWER_LVL RF24_PA_HIGH   // Power level of the receiver on board
 #define MAX_TELEM_STRING_LEN 63           // Length of message not including null terminator

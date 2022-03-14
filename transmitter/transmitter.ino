@@ -1,4 +1,4 @@
-#define CHANNEL 11
+#define CHANNEL 7
 
 #define LED_IND 6
 #define JOY_SWITCH 7
@@ -24,6 +24,7 @@ ControlInput in;
 sllib led_ind(LED_IND, 50);     // LED object for non-blocking blinking
 // LED Patterns
 int double_flash[] = {100, 100, 100, 700};
+bool initialized = false;
 
 void setup(){
   Serial.begin(115200);
@@ -64,37 +65,42 @@ void loop(){
   while (1){
     // Update menu system
     led_ind.update();
-
     cur_time = millis();
     if ((cur_time - last_time) > (1000 / CONTROLLER_RATE_HZ)){
       readInputs(in);
-
+      // displayInputs(in);
+      
       if (radio.txSendControlInput(in)){
         // Serial.println("Transmit success");
-        led_ind.setOnSingle();
-      } else {
-        led_ind.setBlinkSingle(500);
+        led_ind.setBlinkSingle(800);
+        initialized = true;
+      } else if (initialized) {
+        led_ind.setBlinkSingle(200);
       }
 
-      uint8_t len = radio.txGetTelemetry(buf);      
+      uint8_t len = radio.txGetTelemetry(buf);
+      if (len > 0){
+        Serial.print(buf);
+      }  
       last_time = cur_time;
     }
   }
 }
 
 void readInputs(ControlInput &in){
-  in.j2PotX = map(analogRead(JOY_X), 0, 4095, 127, -127);
-  in.j2PotY = map(analogRead(JOY_Y), 0, 4095, -127, 127);
+  in.j2PotX = map(analogRead(JOY_X), 0, 1023, 127, -127);
+  in.j2PotY = map(analogRead(JOY_Y), 0, 1023, -127, 127);
+
   in.j2Button = !digitalRead(JOY_BTN_2);
 
   digitalWrite(JOY_SWITCH, HIGH);
   delayMicroseconds(50);
-  in.j1PotX = map(analogRead(JOY_X), 0, 4095, 127, -127);
-  in.j1PotY = map(analogRead(JOY_Y), 0, 4095, -127, 127);
+  in.j1PotX = map(analogRead(JOY_X), 0, 1023, 127, -127);
+  in.j1PotY = map(analogRead(JOY_Y), 0, 1023, -127, 127);
   digitalWrite(JOY_SWITCH, LOW);
 
   in.j1Button = !digitalRead(JOY_BTN_1);
-  in.pot = map(analogRead(VAR_RES), 0, 4095, -127, 127);
+  in.pot = map(analogRead(VAR_RES), 0, 1023, -127, 127);
   in.tSwitch = !digitalRead(TOGGLE_SWITCH);
   in.button1 = !digitalRead(BTN_1);
   in.button2 = !digitalRead(BTN_2);

@@ -3,8 +3,7 @@
 * Pim Ostendorf - 2017.11.24
 */
 
-#ifndef singleLEDLibrary_h
-#define singleLEDLibrary_h
+#pragma once
 #include "Arduino.h"
 
 class sllib
@@ -63,5 +62,3 @@ class sllib
         int counter = 0;
 
 };
-
-#endif
